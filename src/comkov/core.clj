@@ -1,19 +1,23 @@
 (ns comkov.core
   (:gen-class)
-  (:require [clojure.data.codec.base64 :as base64]))
+  (:require [clj-http.client :as client]))
 
-(:require [clojure.data.codec.base64])
+(def github-headers
+  {:basic-auth [(System/getenv "USERNAME") (System/getenv "PASSWORD")]
+   :accept "application/vnd.github.v3+json"
+   :as :json})
 
-(defn get-basic-auth
+(defn fetch-user-repos-url
   []
-  (let [username (System/getenv "USERNAME")
-        password (System/getenv "PASSWORD")]
-        (str username ":" password))
-)
+  (get-in
+    (client/get "https://api.github.com/user" github-headers)
+    [:body :repos_url]))
 
-(defn base64-encode-string
-  [input]
-  (String (base64/encode (.getBytes input))))
+(defn fetch-urls-for-repos
+  []
+  (get
+    (client/get (fetch-user-repos-url) github-headers)
+    :body))
 
 (defn -main []
-  (base64-encode "test"))
+  (println (get-repos)))
