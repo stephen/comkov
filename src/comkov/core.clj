@@ -29,8 +29,8 @@
        "page" page}}))
 
 (defn fetch-pr-comment-urls-for-repos
-  ([] (fetch-pr-comment-urls-for-repos nil nil))
-  ([page] (fetch-pr-comment-urls-for-repos) nil)
+  ([] (fetch-pr-comment-urls-for-repos nil))
+  ([page] (fetch-pr-comment-urls-for-repos (fetch-user-repos-url) nil))
   ([repos-url page]
     (let
       [response
@@ -41,17 +41,18 @@
                            (:body response))})))
 
 (defn fetch-pr-comments
-  [pr-comments-url, page]
-  (let
-    [response
-      (client/get pr-comments-url (merge github-options (build-pagination-options page)))]
-    {:next_page_url (get-in response [:links :next :href])
-     :comments (map #(:body %) (filter
-                                       #(= (get-in % [:user :login]) current-user)
-                                       (:body response)))}))
+  ([pr-comments-url] (fetch-pr-comments pr-comments-url nil))
+  ([pr-comments-url, page]
+    (let
+      [response
+        (client/get pr-comments-url (merge github-options (build-pagination-options page)))]
+      {:next_page_url (get-in response [:links :next :href])
+       :comments (map #(:body %) (filter #(= (get-in % [:user :login]) current-user)
+                                         (:body response)))})))
 
 (defn -main
   []
   (let [urls (:comments_urls (fetch-pr-comment-urls-for-repos))]
-    (println (count urls))
-    (println urls)))
+    (let [comments (map #(fetch-pr-comments %) urls)]
+      (println (count comments))
+      (println comments))))
