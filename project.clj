@@ -1,6 +1,6 @@
 (defproject comkov "0.1.0-SNAPSHOT"
   :description "comment markov"
-  :url "http://example.com/FIXME"
+  :url "https://github.com/stephen/comkov"
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.6.0"]
